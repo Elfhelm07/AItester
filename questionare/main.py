@@ -12,17 +12,17 @@ client = MongoClient('mongodb://localhost:27017/')
 db = client.recruitment_db
 
 # Define HR questions and answers
-hr_questions = {
+Questions = {
     "What is your greatest strength?": "My greatest strength is my ability to learn quickly and adapt to new situations.",
     "Describe a challenge you faced and how you overcame it.": "I faced a challenge when I had to meet a tight deadline, but I organized my tasks and prioritized effectively."
 }
 
 # Define the job description
-job_description = """
+relWords = """
 We are looking for a candidate who is adaptable and can handle challenges.
 The ideal candidate will have experience in software development and a strong understanding of web technologies, including Python and Docker.
 """
-job_description = job_description.lower()
+relWords = relWords.lower()
 
 # Initialize score and question index
 total_score = 0
@@ -35,9 +35,9 @@ def calculate_similarity(user_response, correct_answer):
     return cosine_similarity(user_vector, answer_vector)[0][0]
 
 # Function to compare user response with job description
-def compare_with_job_description(user_response):
+def compare_with_relWords(user_response):
     # Normalize both the job description and user response to lowercase
-    job_words = set(job_description.lower().split())
+    job_words = set(relWords.lower().split())
     response_words = set(user_response.lower().split())
     
     # Find the intersection of job words and response words
@@ -49,8 +49,8 @@ def compare_with_job_description(user_response):
 # Function to get the next HR question
 def get_next_question():
     global current_question_index
-    if current_question_index < len(hr_questions):
-        question = list(hr_questions.keys())[current_question_index]
+    if current_question_index < len(Questions):
+        question = list(Questions.keys())[current_question_index]
         current_question_index += 1
         return question
     return None
@@ -62,13 +62,13 @@ def start_hr_conversation(user_response):
     
     if question:
         # Calculate similarity with the provided answer
-        similarity = calculate_similarity(user_response, hr_questions[question])
+        similarity = calculate_similarity(user_response, Questions[question])
         
         if similarity >= 0.5:  # Adjust threshold as needed
             total_score += len(user_response)  # Increment score by length of answer
         else:
             # Compare with job description
-            score_increment = compare_with_job_description(user_response)
+            score_increment = compare_with_relWords(user_response)
             total_score += score_increment  # Increment total score by the number of matching words
         
         return question  # Return the next question
